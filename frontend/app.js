@@ -27,49 +27,67 @@ function saveLocalExpenses(expenses) { localStorage.setItem('demo_expenses', JSO
 
 
 
-// Hacemos Scraping directo a la web del BCV usando un proxy para saltar CORS
+// Motor de tiempo límite de seguridad (Timeout)
+
+async function fetchWithTimeout(url, timeout = 4000) {
+
+    const controller = new AbortController();
+
+    const id = setTimeout(() => controller.abort(), timeout);
+
+    try {
+
+        const response = await fetch(url, { signal: controller.signal });
+
+        clearTimeout(id);
+
+        return response;
+
+    } catch (error) {
+
+        clearTimeout(id);
+
+        throw error;
+
+    }
+
+}
+
+
+
+// ������ CONEXIÓN A DOLARAPI.COM (REGIÓN VENEZUELA)
 
 async function fetchLiveBCV() {
 
     try {
 
-        const response = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent('https://www.bcv.org.ve/')}`);
+        const res = await fetchWithTimeout('https://ve.dolarapi.com/v1/dolares/oficial', 4000);
 
-        const data = await response.json();
-
-        const parser = new DOMParser();
-
-        const doc = parser.parseFromString(data.contents, 'text/html');
+        const data = await res.json();
 
         
 
-        // Buscamos exactamente el mismo div que busca tu Python Backend
+        // DolarApi suele devolver la tasa en la llave 'promedio' o 'venta'
 
-        const rateDiv = doc.querySelector('#dolar strong');
+        currentBcvRate = parseFloat(data.promedio || data.venta || data.valor);
 
-        if (rateDiv) {
+        
 
-            let valText = rateDiv.innerText.replace(',', '.').trim();
+    } catch (error) { 
 
-            currentBcvRate = parseFloat(valText);
+        console.warn("Fallo la conexión a DolarApi:", error); 
 
-        } else {
-
-            throw new Error("No se encontró el selector");
-
-        }
-
-    } catch (error) {
-
-        console.error("Error scrapeando BCV:", error);
-
-        // Tasa de emergencia por si el servidor del BCV se cae
+        // Tasa de emergencia estática
 
         currentBcvRate = 857.00; 
 
     }
 
-    loadData();
+    
+
+    // Garantiza que la interfaz gráfica siempre cargue 
+
+    loadData(); 
 
 }
 
