@@ -1,3 +1,44 @@
+// Registro agresivo del Service Worker
+
+if ('serviceWorker' in navigator) {
+
+    window.addEventListener('load', () => {
+
+        navigator.serviceWorker.register('/sw.js')
+
+            .then(registration => {
+
+                console.log('ServiceWorker registrado con éxito. Alcance:', registration.scope);
+
+                
+
+                // Forzar actualización si hay cambios en el código
+
+                registration.onupdatefound = () => {
+
+                    const installingWorker = registration.installing;
+
+                    installingWorker.onstatechange = () => {
+
+                        if (installingWorker.state === 'installed' && navigator.serviceWorker.controller) {
+
+                            console.log('Nueva versión disponible. Refresca la página.');
+
+                            // Opcional: Mostrar un botón de "Actualizar App" al usuario
+
+                        }
+
+                    };
+
+                };
+
+            })
+
+            .catch(err => console.error('Error al registrar el ServiceWorker:', err));
+
+    });
+
+}
 
 let currentBcvRate = 0;
 
@@ -632,4 +673,19 @@ window.saveExpense = async function() {
     loadData();
 
 };
+
+
+
+
+// Activar caché de PWA
+
+if ('serviceWorker' in navigator) {
+
+    window.addEventListener('load', () => {
+
+        navigator.serviceWorker.register('/sw.js').catch(console.error);
+
+    });
+
+}
 

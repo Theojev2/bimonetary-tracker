@@ -1,15 +1,21 @@
+
 {
-  "name": "Finanzas PWA",
+
+  "name": "Bimonetary Tracker",
+
   "short_name": "Finanzas",
-  "start_url": "/",
+
+  "start_url": "./index.html",
+
   "display": "standalone",
+
   "background_color": "#000000",
+
   "theme_color": "#000000",
-  "icons": [
-    {
-      "src": "icon.svg",
-      "sizes": "512x512",
-      "type": "image/svg+xml"
-    }
-  ]
+
+  "orientation": "portrait-primary",
+
+  "icons": [{"src": "https://cdn-icons-png.flaticon.com/512/5501/5501375.png", "sizes": "512x512", "type": "image/png"}]
+
 }
+
