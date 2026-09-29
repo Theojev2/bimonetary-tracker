@@ -1,0 +1,39 @@
+
+# Base de datos y datos locales
+
+*.db
+
+*.sqlite3
+
+*.sqlite
+
+
+
+# Entornos virtuales y Python
+
+__pycache__/
+
+*.py[cod]
+
+*$py.class
+
+venv/
+
+.env
+
+
+
+# Archivos de sistema / editores
+
+.DS_Store
+
+.vscode/
+
+.idea/
+
+
+
+# Logs
+
+*.log
+
