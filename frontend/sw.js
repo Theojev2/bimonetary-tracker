@@ -1,67 +1,71 @@
-// Service Worker optimizado - Cache First para assets, Network First para API
-const CACHE_NAME = 'bimonetary-v2';
-const API_CACHE = 'bimonetary-api-v2';
+// Service Worker optimizado v3 - Cache First + API precargada
+const CACHE_NAME = 'bimonetary-v3';
+const API_CACHE = 'bimonetary-api-v3';
 
-// Assets que se cachean en la instalación
 const PRECACHE_URLS = [
     '/',
     '/index.html',
-    '/app.js',
+    '/app.min.js',
     '/manifest.json',
     '/icon.svg',
     '/icon-192.png',
-    '/icon-512.png'
+    '/icon-512.png',
+    '/apple-touch-icon.png'
 ];
 
-// Instalación: precachear assets
+// Instalación: precachear assets + tasa BCV
 self.addEventListener('install', event => {
     event.waitUntil(
         caches.open(CACHE_NAME)
             .then(cache => cache.addAll(PRECACHE_URLS).catch(err => {
-                console.warn('Precache falló para algún recurso:', err);
+                console.warn('Precache parcial falló:', err);
             }))
             .then(() => self.skipWaiting())
+            .then(() => {
+                // 🚀 Precargar tasa BCV en background
+                return fetch('/api/bcv-rate')
+                    .then(res => {
+                        if (res && res.ok) {
+                            return caches.open(API_CACHE).then(cache => cache.put('/api/bcv-rate', res));
+                        }
+                    })
+                    .catch(() => {});
+            })
     );
 });
 
 // Activación: limpiar cachés viejos
 self.addEventListener('activate', event => {
     event.waitUntil(
-        caches.keys().then(cacheNames => {
-            return Promise.all(
-                cacheNames
-                    .filter(name => name !== CACHE_NAME && name !== API_CACHE)
-                    .map(name => caches.delete(name))
-            );
-        }).then(() => self.clients.claim())
+        caches.keys().then(names => Promise.all(
+            names.filter(n => n !== CACHE_NAME && n !== API_CACHE)
+                 .map(n => caches.delete(n))
+        )).then(() => self.clients.claim())
     );
 });
 
-// Fetch: estrategia según el tipo de recurso
+// Fetch: Cache First para assets, Network First para API
 self.addEventListener('fetch', event => {
     const { request } = event;
-    const url = new URL(request.url);
-
-    // Solo manejar GET
     if (request.method !== 'GET') return;
 
-    // API: Network First con fallback a caché (timeout 3s)
+    const url = new URL(request.url);
+
+    // API: Network First con timeout 3s + fallback caché
     if (url.pathname.startsWith('/api/')) {
         event.respondWith(
             Promise.race([
-                fetch(request).then(response => {
-                    if (response && response.status === 200) {
-                        const clone = response.clone();
-                        caches.open(API_CACHE).then(cache => cache.put(request, clone));
+                fetch(request).then(res => {
+                    if (res && res.status === 200) {
+                        const clone = res.clone();
+                        caches.open(API_CACHE).then(c => c.put(request, clone));
                     }
-                    return response;
+                    return res;
                 }),
-                new Promise((_, reject) =>
-                    setTimeout(() => reject(new Error('timeout')), 3000)
-                )
+                new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), 3000))
             ]).catch(() =>
                 caches.match(request).then(cached => cached || new Response(
-                    JSON.stringify({ error: 'offline', cached: false }),
+                    JSON.stringify({ error: 'offline' }),
                     { status: 503, headers: { 'Content-Type': 'application/json' } }
                 ))
             )
@@ -69,17 +73,17 @@ self.addEventListener('fetch', event => {
         return;
     }
 
-    // Assets: Cache First con actualización en background
+    // Assets: Cache First + revalidación en background
     event.respondWith(
         caches.match(request).then(cached => {
-            const fetchPromise = fetch(request).then(response => {
-                if (response && response.status === 200 && response.type === 'basic') {
-                    const clone = response.clone();
-                    caches.open(CACHE_NAME).then(cache => cache.put(request, clone));
+            const network = fetch(request).then(res => {
+                if (res && res.status === 200 && res.type === 'basic') {
+                    const clone = res.clone();
+                    caches.open(CACHE_NAME).then(c => c.put(request, clone));
                 }
-                return response;
+                return res;
             }).catch(() => cached);
-            return cached || fetchPromise;
+            return cached || network;
         })
     );
 });
