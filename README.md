@@ -36,7 +36,7 @@ Si quieres correr esto en tu propio servidor (VPS) con base de datos real:
 `python3 -m http.server 8080`
 
 ## 📄 Demo Pública
-Si solo quieres probar la interfaz sin instalar nada (versión serverless con LocalStorage), visita el enlace de la demo en mi perfil de TikTok.
+https://bimonetary-tracker.pages.dev/
 
 ---
 Distribuido bajo la Licencia MIT. Construido en público por Jorge Millan.
