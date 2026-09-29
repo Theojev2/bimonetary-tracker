@@ -69,7 +69,7 @@
 
 
 
-        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 50px; /* Aumentado de 30px a 50px para dar respiro al botón Comida */ }
 
         .header-date { font-weight: 700; font-size: 20px; color: var(--text-main); }
 
@@ -79,7 +79,7 @@
 
         
 
-        .voice-btn { background: rgba(255, 255, 255, 0.1); border: 1px solid var(--border); color: #fff; width: 36px; height: 36px; border-radius: 12px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s; font-size: 18px; }
+        .voice-btn { background: rgba(255, 255, 255, 0.1); border: 1px solid var(--border); color: #fff; width: 36px; height: 36px; border-radius: 12px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s; font-size: 18px; z-index: 20; /* Asegura que el botón de voz esté siempre arriba */ }
 
         .voice-btn:active { transform: scale(0.9); background: var(--accent); color: #000; }
 
@@ -113,7 +113,15 @@
 
         .cat-btn span { font-size: 10px; font-weight: 600; }
 
-        .pos-1 { top: 0%; left: 50%; } .pos-2 { top: 38%; left: 95%; } .pos-3 { top: 90%; left: 79%; } .pos-4 { top: 90%; left: 21%; } .pos-5 { top: 38%; left: 5%; }
+        .pos-1 { top: -5%; left: 50%; } /* Ajustado para separar de la cabecera */
+
+        .pos-2 { top: 38%; left: 95%; } 
+
+        .pos-3 { top: 90%; left: 79%; } 
+
+        .pos-4 { top: 90%; left: 21%; } 
+
+        .pos-5 { top: 38%; left: 5%; }
 
 
 
@@ -199,19 +207,25 @@
 
 
 
-        /* DISEÑO DE ESCRITORIO (DASHBOARD PANORÁMICO) */
+        /* DISEÑO DE ESCRITORIO (DASHBOARD PANORÁMICO OPTIMIZADO) */
 
         @media (min-width: 850px) {
 
-            body { align-items: center; background-color: #080808; }
+            body { align-items: center; background-color: #080808; min-height: 100vh; margin: 0; }
 
             .app-wrapper {
 
-                max-width: 1000px; height: 650px; min-height: auto;
+                width: 90vw; /* Usa el 90% del ancho de la pantalla */
+
+                max-width: 1400px; /* Límite máximo para pantallas ultra anchas */
+
+                height: 80vh; /* Usa el 80% del alto de la pantalla */
+
+                min-height: 600px;
 
                 display: grid;
 
-                grid-template-columns: 1fr 1fr;
+                grid-template-columns: 1fr 1.5fr; /* Panel derecho más ancho para la lista */
 
                 grid-template-areas: 
 
@@ -219,9 +233,9 @@
 
                     "chart list";
 
-                gap: 0 50px;
+                gap: 20px 60px; /* Espacio entre columnas */
 
-                padding: 40px 50px;
+                padding: 40px 60px;
 
                 border-radius: 30px;
 
@@ -231,29 +245,81 @@
 
                 background-color: var(--bg);
 
+                box-sizing: border-box;
+
             }
 
-            .header { grid-area: header; margin-bottom: 20px; }
+            .header { grid-area: header; margin-bottom: 0; align-self: start; }
 
-            .ring-container { grid-area: chart; margin: 20px auto 0 auto; width: 100%; max-width: 380px; }
+            
 
-            .list-section { 
+            /* Contenedor del gráfico ampliado y centrado verticalmente */
 
-                grid-area: list; 
+            .ring-container { 
 
-                height: 460px; 
+                grid-area: chart; 
 
-                overflow-y: auto; 
+                margin: auto; /* Centra en su celda del grid */
 
-                padding-right: 15px; 
+                width: 100%; 
+
+                max-width: 500px; /* Gráfico mucho más grande */
+
+                aspect-ratio: 1;
 
             }
 
             
 
+            /* Ajustes para los botones de categorías en PC para que no se vean diminutos */
+
+            .cat-btn { width: 80px; height: 80px; }
+
+            .cat-btn ion-icon { font-size: 30px; }
+
+            .cat-btn span { font-size: 12px; }
+
+            .center-usd { font-size: 36px; } /* Texto central más grande */
+
+
+
+            .list-section { 
+
+                grid-area: list; 
+
+                height: 100%; /* Toma todo el alto disponible */
+
+                max-height: calc(80vh - 120px); /* Resta el padding/header */
+
+                overflow-y: auto; 
+
+                padding-right: 20px; 
+
+                display: flex;
+
+                flex-direction: column;
+
+            }
+
+            
+
+            /* Lista expandida */
+
+            .expense-item { padding: 20px; margin-bottom: 15px; }
+
+            .ex-title { font-size: 18px; }
+
+            .ex-usd { font-size: 18px; }
+
+            .ex-ves { font-size: 14px; }
+
+            .ex-icon { font-size: 24px; padding: 15px; }
+
+            
+
             /* Scrollbar elegante */
 
-            .list-section::-webkit-scrollbar { width: 6px; }
+            .list-section::-webkit-scrollbar { width: 8px; }
 
             .list-section::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
 
