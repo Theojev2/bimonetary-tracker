@@ -1,5 +1,11 @@
 
-let currentBcvRate = 0;
+// Ì†ΩÌª†Ô∏è TASA MANUAL PARA LA DEMO P√öBLICA (Evita fallos de APIs externas)
+
+const TASA_BCV_DEMO = 36.70; 
+
+
+
+let currentBcvRate = TASA_BCV_DEMO;
 
 let currentAmountStr = "";
 
@@ -7,7 +13,7 @@ let currentAmountStr = "";
 
 document.addEventListener('DOMContentLoaded', () => {
 
-    fetchRealRate();
+    loadData();
 
 });
 
@@ -24,32 +30,6 @@ const meses = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', '
 function getLocalExpenses() { return JSON.parse(localStorage.getItem('demo_expenses')) || []; }
 
 function saveLocalExpenses(expenses) { localStorage.setItem('demo_expenses', JSON.stringify(expenses)); }
-
-
-
-// Llamada a API p√∫blica para obtener tasa real
-
-async function fetchRealRate() {
-
-    try {
-
-        const res = await fetch('https://pydolarvenezuela-api.vercel.app/api/v1/dollar/page?page=bcv');
-
-        const data = await res.json();
-
-        currentBcvRate = data.monedas.usd.valor;
-
-    } catch (error) {
-
-        console.error("Error API:", error);
-
-        currentBcvRate = 36.85; // Respaldo en caso de error
-
-    }
-
-    loadData();
-
-}
 
 
 
@@ -87,9 +67,9 @@ function loadData() {
 
     if (expenses.length === 0) {
 
-        // Texto limpio sin emojis que rompan la codificaci√≥n
+        // Mensaje limpio
 
-        list.innerHTML = '<p style="color: var(--text-sec); text-align: center; font-size: 14px; margin-top: 20px;">Toca una categoria para probar <ion-icon name="arrow-up-outline"></ion-icon></p>';
+        list.innerHTML = '<p style="color: var(--text-sec); text-align: center; font-size: 14px; margin-top: 20px;">Toca una categor√≠a para probar <ion-icon name="arrow-up-outline"></ion-icon></p>';
 
         document.getElementById('category-chart').style.background = `conic-gradient(var(--border) 0% 100%)`;
 
