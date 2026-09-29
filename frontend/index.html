@@ -69,7 +69,9 @@
 
 
 
-        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 50px; /* Aumentado de 30px a 50px para dar respiro al botón Comida */ }
+        /* Aumentamos el margen inferior del header para empujar la rueda hacia abajo */
+
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 75px; }
 
         .header-date { font-weight: 700; font-size: 20px; color: var(--text-main); }
 
@@ -79,7 +81,7 @@
 
         
 
-        .voice-btn { background: rgba(255, 255, 255, 0.1); border: 1px solid var(--border); color: #fff; width: 36px; height: 36px; border-radius: 12px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s; font-size: 18px; z-index: 20; /* Asegura que el botón de voz esté siempre arriba */ }
+        .voice-btn { background: rgba(255, 255, 255, 0.1); border: 1px solid var(--border); color: #fff; width: 36px; height: 36px; border-radius: 12px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s; font-size: 18px; z-index: 20;}
 
         .voice-btn:active { transform: scale(0.9); background: var(--accent); color: #000; }
 
@@ -91,7 +93,9 @@
 
 
 
-        .ring-container { position: relative; width: 100%; max-width: 320px; aspect-ratio: 1; margin: 0 auto 40px auto; }
+        /* Aumentada la escala del contenedor principal en móvil */
+
+        .ring-container { position: relative; width: 100%; max-width: 350px; aspect-ratio: 1; margin: 0 auto 40px auto; }
 
         .chart-ring { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 58%; height: 58%; border-radius: 50%; background: conic-gradient(var(--border) 0% 100%); z-index: 1; transition: background 0.5s ease-out; box-shadow: 0 0 25px var(--accent-glow); }
 
@@ -99,29 +103,75 @@
 
         .center-label { font-size: 11px; color: var(--text-sec); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 2px;}
 
-        .center-usd { font-size: 26px; font-weight: 700; color: var(--text-main); margin: 0;}
+        .center-usd { font-size: 28px; font-weight: 700; color: var(--text-main); margin: 0;}
 
         .center-ves { font-size: 12px; color: var(--accent); font-weight: 600; margin-top: 4px;}
 
 
 
-        .cat-btn { position: absolute; transform: translate(-50%, -50%); background: var(--surface); border: 1px solid var(--border); border-radius: 50%; width: 68px; height: 68px; display: flex; flex-direction: column; justify-content: center; align-items: center; color: var(--text-sec); box-shadow: 0 8px 16px rgba(0,0,0,0.4); transition: all 0.2s; cursor: pointer; z-index: 10; }
+        /* Botones de categorías: más grandes en móvil y con transición suave */
 
-        .cat-btn:active { transform: translate(-50%, -50%) scale(0.9); }
+        .cat-btn { 
 
-        .cat-btn ion-icon { font-size: 24px; margin-bottom: 4px; }
+            position: absolute; transform: translate(-50%, -50%); background: var(--surface); 
 
-        .cat-btn span { font-size: 10px; font-weight: 600; }
+            border: 1px solid var(--border); border-radius: 50%; 
 
-        .pos-1 { top: -5%; left: 50%; } /* Ajustado para separar de la cabecera */
+            width: 74px; height: 74px; 
 
-        .pos-2 { top: 38%; left: 95%; } 
+            display: flex; flex-direction: column; justify-content: center; align-items: center; 
 
-        .pos-3 { top: 90%; left: 79%; } 
+            color: var(--text-sec); box-shadow: 0 8px 16px rgba(0,0,0,0.4); 
 
-        .pos-4 { top: 90%; left: 21%; } 
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); cursor: pointer; z-index: 10; 
 
-        .pos-5 { top: 38%; left: 5%; }
+        }
+
+        
+
+        /* Efecto de Iluminación para Escritorio (Mouse Hover) */
+
+        @media (hover: hover) {
+
+            .cat-btn:hover {
+
+                box-shadow: 0 0 25px rgba(255, 255, 255, 0.15), inset 0 0 10px rgba(255, 255, 255, 0.05);
+
+                transform: translate(-50%, -50%) scale(1.1);
+
+                border-color: rgba(255, 255, 255, 0.4);
+
+                color: #ffffff;
+
+                z-index: 20;
+
+            }
+
+        }
+
+        
+
+        .cat-btn:active { transform: translate(-50%, -50%) scale(0.9); box-shadow: none; }
+
+        .cat-btn ion-icon { font-size: 26px; margin-bottom: 4px; transition: transform 0.3s; }
+
+        .cat-btn:hover ion-icon { transform: scale(1.15); }
+
+        .cat-btn span { font-size: 11px; font-weight: 600; }
+
+        
+
+        /* Ajuste de posiciones */
+
+        .pos-1 { top: -2%; left: 50%; } 
+
+        .pos-2 { top: 38%; left: 98%; } 
+
+        .pos-3 { top: 92%; left: 81%; } 
+
+        .pos-4 { top: 92%; left: 19%; } 
+
+        .pos-5 { top: 38%; left: 2%; }
 
 
 
@@ -215,17 +265,17 @@
 
             .app-wrapper {
 
-                width: 90vw; /* Usa el 90% del ancho de la pantalla */
+                width: 90vw;
 
-                max-width: 1400px; /* Límite máximo para pantallas ultra anchas */
+                max-width: 1400px;
 
-                height: 80vh; /* Usa el 80% del alto de la pantalla */
+                height: 80vh;
 
                 min-height: 600px;
 
                 display: grid;
 
-                grid-template-columns: 1fr 1.5fr; /* Panel derecho más ancho para la lista */
+                grid-template-columns: 1fr 1.5fr;
 
                 grid-template-areas: 
 
@@ -233,7 +283,7 @@
 
                     "chart list";
 
-                gap: 20px 60px; /* Espacio entre columnas */
+                gap: 20px 60px;
 
                 padding: 40px 60px;
 
@@ -253,17 +303,17 @@
 
             
 
-            /* Contenedor del gráfico ampliado y centrado verticalmente */
+            /* Gráfico super expandido para PC */
 
             .ring-container { 
 
                 grid-area: chart; 
 
-                margin: auto; /* Centra en su celda del grid */
+                margin: auto; 
 
                 width: 100%; 
 
-                max-width: 500px; /* Gráfico mucho más grande */
+                max-width: 550px; 
 
                 aspect-ratio: 1;
 
@@ -271,15 +321,15 @@
 
             
 
-            /* Ajustes para los botones de categorías en PC para que no se vean diminutos */
+            /* Botones de categorías enormes en PC */
 
-            .cat-btn { width: 80px; height: 80px; }
+            .cat-btn { width: 100px; height: 100px; }
 
-            .cat-btn ion-icon { font-size: 30px; }
+            .cat-btn ion-icon { font-size: 34px; margin-bottom: 6px; }
 
-            .cat-btn span { font-size: 12px; }
+            .cat-btn span { font-size: 13px; letter-spacing: 0.5px;}
 
-            .center-usd { font-size: 36px; } /* Texto central más grande */
+            .center-usd { font-size: 44px; } 
 
 
 
@@ -287,9 +337,9 @@
 
                 grid-area: list; 
 
-                height: 100%; /* Toma todo el alto disponible */
+                height: 100%;
 
-                max-height: calc(80vh - 120px); /* Resta el padding/header */
+                max-height: calc(80vh - 120px);
 
                 overflow-y: auto; 
 
@@ -303,9 +353,9 @@
 
             
 
-            /* Lista expandida */
+            .expense-item { padding: 20px; margin-bottom: 15px; transition: transform 0.2s; }
 
-            .expense-item { padding: 20px; margin-bottom: 15px; }
+            .expense-item:hover { transform: translateX(-5px); border-color: rgba(255,255,255,0.2); }
 
             .ex-title { font-size: 18px; }
 
@@ -317,15 +367,11 @@
 
             
 
-            /* Scrollbar elegante */
-
             .list-section::-webkit-scrollbar { width: 8px; }
 
             .list-section::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
 
             
-
-            /* Modal centrado como Pop-up en PC */
 
             .modal-overlay { align-items: center; }
 
