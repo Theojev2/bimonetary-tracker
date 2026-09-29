@@ -100,7 +100,7 @@ async function loadData() {
 
     try {
 
-        const bcvRes = await fetch('/api/bcv-rate');
+        const bcvRes = await fetch('http://107.21.60.65:8000/api/bcv-rate');
 
         const bcvData = await bcvRes.json();
 
@@ -130,7 +130,7 @@ async function loadData() {
 
 
 
-        const expRes = await fetch('/api/expenses');
+        const expRes = await fetch('http://107.21.60.65:8000/api/expenses');
 
         const expenses = await expRes.json();
 
@@ -396,7 +396,7 @@ async function parseVoiceCommand(text) {
 
 
 
-        await fetch('/api/expenses', {
+        await fetch('http://107.21.60.65:8000/api/expenses', {
 
             method: 'POST',
 
@@ -652,7 +652,7 @@ window.saveExpense = async function() {
 
     
 
-    await fetch('/api/expenses', {
+    await fetch('http://107.21.60.65:8000/api/expenses', {
 
         method: 'POST',
 
