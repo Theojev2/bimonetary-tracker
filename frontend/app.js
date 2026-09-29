@@ -598,7 +598,7 @@ window.deleteExpense = async function(id) {
 
         try {
 
-            await fetch(`/api/expenses/${id}`, { method: 'DELETE' });
+            await fetch(`http://107.21.60.65:8000/api/expenses/${id}`, { method: 'DELETE' });
 
             loadData();
 
