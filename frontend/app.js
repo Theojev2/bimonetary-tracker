@@ -7,215 +7,205 @@ let currentAmountStr = "";
 
 document.addEventListener('DOMContentLoaded', () => {
 
-    if ('serviceWorker' in navigator) {
-
-        navigator.serviceWorker.register('sw.js');
-
-    }
-
-    loadData();
+    fetchLiveBCV();
 
 });
 
 
 
-const iconMap = {
+const iconMap = { 'Comida': 'restaurant-outline', 'Casa': 'home-outline', 'Servicios': 'flash-outline', 'Transporte': 'car-sport-outline', 'Otros': 'apps-outline' };
 
-    'Comida': 'restaurant-outline',
-
-    'Casa': 'home-outline',
-
-    'Servicios': 'flash-outline',
-
-    'Transporte': 'car-sport-outline',
-
-    'Otros': 'apps-outline'
-
-};
-
-
-
-const catColors = {
-
-    'Comida': '#ff5964',
-
-    'Casa': '#38b000',
-
-    'Servicios': '#f77f00',
-
-    'Transporte': '#48cae4',
-
-    'Otros': '#b5179e'
-
-};
-
-
+const catColors = { 'Comida': '#ff5964', 'Casa': '#38b000', 'Servicios': '#f77f00', 'Transporte': '#48cae4', 'Otros': '#b5179e' };
 
 const meses = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
 
 
 
-async function loadData() {
+function getLocalExpenses() { return JSON.parse(localStorage.getItem('demo_expenses')) || []; }
+
+function saveLocalExpenses(expenses) { localStorage.setItem('demo_expenses', JSON.stringify(expenses)); }
+
+
+
+// Motor de tiempo límite de seguridad (Timeout)
+
+async function fetchWithTimeout(url, timeout = 4000) {
+
+    const controller = new AbortController();
+
+    const id = setTimeout(() => controller.abort(), timeout);
 
     try {
 
-        const bcvRes = await fetch('/api/bcv-rate');
+        const response = await fetch(url, { signal: controller.signal });
 
-        const bcvData = await bcvRes.json();
+        clearTimeout(id);
 
-        
+        return response;
 
-        currentBcvRate = bcvData.rate;
+    } catch (error) {
 
-        
+        clearTimeout(id);
 
-        const rawDate = bcvData.fetched_at.split(' ')[0];
+        throw error;
 
-        const [year, month, day] = rawDate.split('-');
+    }
 
-        
-
-        document.getElementById('date-display').innerText = `${parseInt(day)}/${parseInt(month)}/${year}`;
-
-        document.getElementById('rate-display').innerHTML = `<ion-icon name="swap-horizontal"></ion-icon> BCV: Bs. ${bcvData.rate.toFixed(2)}`;
+}
 
 
 
-        const mesActual = meses[new Date().getMonth()];
+// ������ CONEXIÓN A DOLARAPI.COM (REGIÓN VENEZUELA)
 
-        const titleElement = document.getElementById('list-title');
+async function fetchLiveBCV() {
 
-        if (titleElement) titleElement.innerText = `Gastos de ${mesActual}`;
+    try {
 
+        const res = await fetchWithTimeout('https://ve.dolarapi.com/v1/dolares/oficial', 4000);
 
-
-        const expRes = await fetch('/api/expenses');
-
-        const expenses = await expRes.json();
-
-        const list = document.getElementById('expenses-list');
-
-        list.innerHTML = '';
+        const data = await res.json();
 
         
 
-        let totalUsd = 0;
+        // DolarApi suele devolver la tasa en la llave 'promedio' o 'venta'
 
-        let totalVes = 0;
-
-        let catTotals = { 'Comida': 0, 'Casa': 0, 'Servicios': 0, 'Transporte': 0, 'Otros': 0 };
+        currentBcvRate = parseFloat(data.promedio || data.venta || data.valor);
 
         
 
-        if (expenses.length === 0) {
+    } catch (error) { 
 
-            list.innerHTML = '<p style="color: var(--text-sec); text-align: center; font-size: 14px; margin-top: 20px;">Sin movimientos este mes</p>';
+        console.warn("Fallo la conexión a DolarApi:", error); 
 
-            document.getElementById('category-chart').style.background = `conic-gradient(var(--border) 0% 100%)`;
+        // Tasa de emergencia estática
 
-        } else {
+        currentBcvRate = 857.00; 
 
-            expenses.forEach(e => {
+    }
 
-                totalUsd += e.amount_usd;
+    
 
-                totalVes += e.amount_ves;
+    // Garantiza que la interfaz gráfica siempre cargue 
 
-                
+    loadData(); 
 
-                const catName = e.category || 'Otros';
+}
 
-                catTotals[catName] = (catTotals[catName] || 0) + e.amount_usd;
 
-                
 
-                const ionName = iconMap[catName] || 'apps-outline';
+function loadData() {
 
-                const cColor = catColors[catName] || '#8e8e93';
+    const today = new Date();
 
-                const descText = e.description ? `<div class="ex-desc">${e.description}</div>` : '';
+    document.getElementById('date-display').innerText = `${today.getDate()}/${today.getMonth()+1}/${today.getFullYear()}`;
 
-                
+    document.getElementById('rate-display').innerHTML = `<ion-icon name="swap-horizontal"></ion-icon> BCV: Bs. ${currentBcvRate.toFixed(2)}`;
 
-                list.innerHTML += `
+    
 
-                <div class="expense-item">
+    const mesActual = meses[today.getMonth()];
 
-                    <div class="ex-info">
+    const titleElement = document.getElementById('list-title');
 
-                        <div class="ex-icon" style="color: ${cColor};"><ion-icon name="${ionName}"></ion-icon></div>
+    if (titleElement) titleElement.innerText = `Gastos de ${mesActual} (Demo)`;
 
-                        <div>
 
-                            <span class="ex-title">${catName}</span>
 
-                            ${descText}
+    const expenses = getLocalExpenses();
 
-                        </div>
+    const list = document.getElementById('expenses-list');
 
-                    </div>
+    list.innerHTML = '';
 
-                    <div class="ex-amount">
+    
 
-                        <div class="ex-usd">-$${e.amount_usd.toFixed(2)}</div>
+    let totalUsd = 0; let totalVes = 0;
 
-                        <div class="ex-ves">Bs. ${e.amount_ves.toFixed(2)}</div>
+    let catTotals = { 'Comida': 0, 'Casa': 0, 'Servicios': 0, 'Transporte': 0, 'Otros': 0 };
 
-                    </div>
+    
 
-                    <button class="btn-delete" onclick="deleteExpense(${e.id})">
+    if (expenses.length === 0) {
 
-                        <ion-icon name="trash-outline"></ion-icon>
+        list.innerHTML = '<p style="color: var(--text-sec); text-align: center; font-size: 14px; margin-top: 20px;">Toca una categoría para probar <br><br> <ion-icon name="arrow-up-outline"></ion-icon></p>';
 
-                    </button>
+        document.getElementById('category-chart').style.background = `conic-gradient(var(--border) 0% 100%)`;
 
-                </div>`;
+    } else {
 
-            });
+        expenses.forEach(e => {
+
+            totalUsd += e.amount_usd; totalVes += e.amount_ves;
+
+            const catName = e.category || 'Otros';
+
+            catTotals[catName] = (catTotals[catName] || 0) + e.amount_usd;
+
+            const ionName = iconMap[catName] || 'apps-outline';
+
+            const cColor = catColors[catName] || '#8e8e93';
+
+            const descText = e.description ? `<div class="ex-desc">${e.description}</div>` : '';
 
             
 
-            let startAngle = 0;
+            list.innerHTML += `
 
-            let gradients = [];
+            <div class="expense-item">
 
-            for (const cat in catTotals) {
+                <div class="ex-info">
 
-                if (catTotals[cat] > 0) {
+                    <div class="ex-icon" style="color: ${cColor};"><ion-icon name="${ionName}"></ion-icon></div>
 
-                    const percentage = (catTotals[cat] / totalUsd) * 100;
+                    <div><span class="ex-title">${catName}</span>${descText}</div>
 
-                    const endAngle = startAngle + percentage;
+                </div>
 
-                    gradients.push(`${catColors[cat]} ${startAngle}% ${endAngle}%`);
+                <div class="ex-amount">
 
-                    startAngle = endAngle;
+                    <div class="ex-usd">-$${e.amount_usd.toFixed(2)}</div>
 
-                }
+                    <div class="ex-ves">Bs. ${e.amount_ves.toFixed(2)}</div>
 
-            }
+                </div>
 
-            if (gradients.length > 0) {
+                <button class="btn-delete" onclick="deleteExpense(${e.id})">
 
-                document.getElementById('category-chart').style.background = `conic-gradient(${gradients.join(', ')})`;
+                    <ion-icon name="trash-outline"></ion-icon>
+
+                </button>
+
+            </div>`;
+
+        });
+
+        
+
+        let startAngle = 0; let gradients = [];
+
+        for (const cat in catTotals) {
+
+            if (catTotals[cat] > 0) {
+
+                const percentage = (catTotals[cat] / totalUsd) * 100;
+
+                const endAngle = startAngle + percentage;
+
+                gradients.push(`${catColors[cat]} ${startAngle}% ${endAngle}%`);
+
+                startAngle = endAngle;
 
             }
 
         }
 
-        
-
-        document.getElementById('total-usd').innerText = `$${totalUsd.toFixed(2)}`;
-
-        document.getElementById('total-ves').innerText = `Bs. ${totalVes.toFixed(2)}`;
-
-        
-
-    } catch (error) {
-
-        console.error('Error:', error);
+        if (gradients.length > 0) document.getElementById('category-chart').style.background = `conic-gradient(${gradients.join(', ')})`;
 
     }
+
+    document.getElementById('total-usd').innerText = `$${totalUsd.toFixed(2)}`;
+
+    document.getElementById('total-ves').innerText = `Bs. ${totalVes.toFixed(2)}`;
 
 }
 
@@ -225,157 +215,99 @@ window.startVoiceRecognition = function() {
 
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 
-    if (!SpeechRecognition) {
-
-        alert("Tu navegador no soporta reconocimiento de voz nativo.");
-
-        return;
-
-    }
-
-
+    if (!SpeechRecognition) { alert("Tu navegador no soporta voz nativa en esta demo."); return; }
 
     const recognition = new SpeechRecognition();
 
-    recognition.lang = 'es-ES';
-
-    recognition.interimResults = false;
-
-    recognition.maxAlternatives = 1;
-
-
+    recognition.lang = 'es-ES'; recognition.interimResults = false; recognition.maxAlternatives = 1;
 
     const micBtn = document.getElementById('voice-trigger');
 
-    micBtn.classList.add('listening');
-
-    micBtn.innerHTML = '<ion-icon name="mic"></ion-icon>';
-
-
+    micBtn.classList.add('listening'); micBtn.innerHTML = '<ion-icon name="mic"></ion-icon>';
 
     recognition.start();
 
 
 
-    recognition.onresult = async function(event) {
+    recognition.onresult = function(event) {
 
         const transcript = event.results[0][0].transcript.toLowerCase();
 
-        micBtn.classList.remove('listening');
-
-        micBtn.innerHTML = '<ion-icon name="mic-outline"></ion-icon>';
+        micBtn.classList.remove('listening'); micBtn.innerHTML = '<ion-icon name="mic-outline"></ion-icon>';
 
         parseVoiceCommand(transcript);
 
     };
 
+    recognition.onerror = function() { micBtn.classList.remove('listening'); micBtn.innerHTML = '<ion-icon name="mic-outline"></ion-icon>'; };
 
-
-    recognition.onerror = function(event) {
-
-        micBtn.classList.remove('listening');
-
-        micBtn.innerHTML = '<ion-icon name="mic-outline"></ion-icon>';
-
-        console.error('Error de voz:', event.error);
-
-    };
-
-
-
-    recognition.onend = function() {
-
-        micBtn.classList.remove('listening');
-
-        micBtn.innerHTML = '<ion-icon name="mic-outline"></ion-icon>';
-
-    };
+    recognition.onend = function() { micBtn.classList.remove('listening'); micBtn.innerHTML = '<ion-icon name="mic-outline"></ion-icon>'; };
 
 };
 
 
 
-async function parseVoiceCommand(text) {
+function parseVoiceCommand(text) {
 
     const numberMatch = text.match(/\d+([.,]\d+)?/);
 
-    if (!numberMatch) {
-
-        alert(`No entendí el monto en: "${text}". Intenta diciendo un número.`);
-
-        return;
-
-    }
-
-
+    if (!numberMatch) { alert(`No entendí el monto en: "${text}"`); return; }
 
     const amount = parseFloat(numberMatch[0].replace(',', '.'));
 
-    
-
     let currency = 'USD';
 
-    if (text.includes('bolivares') || text.includes('bolívar') || text.includes('bs')) {
-
-        currency = 'VES';
-
-    }
-
-
+    if (text.includes('bolivares') || text.includes('bolívar') || text.includes('bs')) currency = 'VES';
 
     let category = 'Otros';
 
-    if (text.includes('comida') || text.includes('almuerzo') || text.includes('cena') || text.includes('mercado')) category = 'Comida';
+    if (text.includes('comida') || text.includes('almuerzo')) category = 'Comida';
 
-    else if (text.includes('casa') || text.includes('alquiler')) category = 'Casa';
+    else if (text.includes('casa')) category = 'Casa';
 
-    else if (text.includes('transporte') || text.includes('pasaje') || text.includes('taxi') || text.includes('gasolina')) category = 'Transporte';
+    else if (text.includes('transporte') || text.includes('pasaje')) category = 'Transporte';
 
-    else if (text.includes('luz') || text.includes('internet') || text.includes('servicio')) category = 'Servicios';
+    else if (text.includes('luz') || text.includes('servicio')) category = 'Servicios';
 
+    
 
+    const description = text.replace(numberMatch[0], '').replace('dólares', '').replace('bolívares', '').replace('bs', '').replace('en', '').trim();
 
-    const description = text.replace(numberMatch[0], '').replace('dólares', '').replace('dolares', '').replace('bolívares', '').replace('bolivares', '').replace('bs', '').replace('en', '').trim();
+    saveToLocalDB(category, description || 'Gasto por voz', amount, currency);
 
-
-
-    try {
-
-        const payload = {
-
-            category: category,
-
-            description: description ? (description.charAt(0).toUpperCase() + description.slice(1)) : 'Gasto por voz',
-
-            amount: amount,
-
-            currency: currency
-
-        };
+}
 
 
 
-        await fetch('/api/expenses', {
+function saveToLocalDB(category, description, amount, currency) {
 
-            method: 'POST',
+    const expenses = getLocalExpenses();
 
-            headers: {'Content-Type': 'application/json'},
+    let amount_usd = amount; let amount_ves = amount * currentBcvRate;
 
-            body: JSON.stringify(payload)
+    if (currency === 'VES') { amount_ves = amount; amount_usd = amount / currentBcvRate; }
 
-        });
+    
 
+    expenses.unshift({
 
+        id: Date.now(),
 
-        if (navigator.vibrate) navigator.vibrate([50, 50, 50]);
+        category: category,
 
-        loadData();
+        description: description.charAt(0).toUpperCase() + description.slice(1),
 
-    } catch (error) {
+        amount_usd: amount_usd,
 
-        console.error('Error guardando voz:', error);
+        amount_ves: amount_ves
 
-    }
+    });
+
+    saveLocalExpenses(expenses);
+
+    if (navigator.vibrate) navigator.vibrate([50, 50, 50]);
+
+    loadData();
 
 }
 
@@ -385,59 +317,25 @@ window.pressKey = function(key) {
 
     if (navigator.vibrate) navigator.vibrate(15);
 
+    if (key === 'del') currentAmountStr = currentAmountStr.slice(0, -1);
 
+    else if (key === '.') { if (!currentAmountStr.includes('.')) currentAmountStr += currentAmountStr === "" ? "0." : "."; }
 
-    if (key === 'del') {
+    else {
 
-        currentAmountStr = currentAmountStr.slice(0, -1);
+        if (currentAmountStr === "0" && key !== ".") currentAmountStr = key;
 
-    } else if (key === '.') {
+        else if (currentAmountStr.includes('.')) { if (currentAmountStr.split('.')[1].length < 2) currentAmountStr += key; }
 
-        if (!currentAmountStr.includes('.')) {
-
-            currentAmountStr += currentAmountStr === "" ? "0." : ".";
-
-        }
-
-    } else {
-
-        if (currentAmountStr === "0" && key !== ".") {
-
-            currentAmountStr = key;
-
-        } else if (currentAmountStr.includes('.')) {
-
-            const decimals = currentAmountStr.split('.')[1];
-
-            if (decimals.length < 2) currentAmountStr += key;
-
-        } else {
-
-            if (currentAmountStr.length < 7) currentAmountStr += key;
-
-        }
+        else { if (currentAmountStr.length < 7) currentAmountStr += key; }
 
     }
-
-    
 
     const display = document.getElementById('amount-display');
 
-    if (currentAmountStr === "") {
+    if (currentAmountStr === "") { display.innerText = "Monto"; display.classList.add('empty'); } 
 
-        display.innerText = "Monto";
-
-        display.classList.add('empty');
-
-    } else {
-
-        display.innerText = currentAmountStr;
-
-        display.classList.remove('empty');
-
-    }
-
-    
+    else { display.innerText = currentAmountStr; display.classList.remove('empty'); }
 
     updateLiveCalc();
 
@@ -465,23 +363,11 @@ window.closeModal = function() {
 
     document.getElementById('expense-modal').classList.remove('active');
 
-    currentAmountStr = "";
+    currentAmountStr = ""; document.getElementById('amount-display').innerText = "Monto"; document.getElementById('amount-display').classList.add('empty');
 
-    const display = document.getElementById('amount-display');
+    document.getElementById('desc-nota').value = ''; document.getElementById('currency').value = 'USD';
 
-    display.innerText = "Monto";
-
-    display.classList.add('empty');
-
-    document.getElementById('desc-nota').value = '';
-
-    document.getElementById('currency').value = 'USD';
-
-    const btns = document.querySelectorAll('.curr-btn');
-
-    btns[0].classList.add('active');
-
-    btns[1].classList.remove('active');
+    const btns = document.querySelectorAll('.curr-btn'); btns[0].classList.add('active'); btns[1].classList.remove('active');
 
     document.getElementById('live-calc').innerText = '';
 
@@ -489,11 +375,7 @@ window.closeModal = function() {
 
 
 
-document.getElementById('expense-modal').addEventListener('click', function(e) {
-
-    if (e.target === this) closeModal();
-
-});
+document.getElementById('expense-modal').addEventListener('click', function(e) { if (e.target === this) closeModal(); });
 
 
 
@@ -503,9 +385,7 @@ window.setCurrency = function(curr, element) {
 
     const btns = document.querySelectorAll('.curr-btn');
 
-    btns.forEach(b => b.classList.remove('active'));
-
-    element.classList.add('active');
+    btns.forEach(b => b.classList.remove('active')); element.classList.add('active');
 
     updateLiveCalc();
 
@@ -515,57 +395,31 @@ window.setCurrency = function(curr, element) {
 
 function updateLiveCalc() {
 
-    const amount = parseFloat(currentAmountStr);
-
-    const currency = document.getElementById('currency').value;
+    const amount = parseFloat(currentAmountStr); const currency = document.getElementById('currency').value;
 
     const calcDiv = document.getElementById('live-calc');
 
+    if (isNaN(amount) || amount <= 0) { calcDiv.innerText = ''; return; }
 
+    if (currency === 'USD') calcDiv.innerText = `≈ Bs. ${(amount * currentBcvRate).toFixed(2)}`;
 
-    if (isNaN(amount) || amount <= 0 || currentBcvRate === 0) {
-
-        calcDiv.innerText = '';
-
-        return;
-
-    }
-
-
-
-    if (currency === 'USD') {
-
-        const ves = amount * currentBcvRate;
-
-        calcDiv.innerText = `≈ Bs. ${ves.toFixed(2)}`;
-
-    } else {
-
-        const usd = amount / currentBcvRate;
-
-        calcDiv.innerText = `≈ $${usd.toFixed(2)}`;
-
-    }
+    else calcDiv.innerText = `≈ $${(amount / currentBcvRate).toFixed(2)}`;
 
 }
 
 
 
-window.deleteExpense = async function(id) {
+window.deleteExpense = function(id) {
 
-    if (confirm("¿Borrar gasto?")) {
+    if (confirm("¿Borrar gasto de prueba?")) {
 
-        try {
+        let expenses = getLocalExpenses();
 
-            await fetch(`/api/expenses/${id}`, { method: 'DELETE' });
+        expenses = expenses.filter(e => e.id !== id);
 
-            loadData();
+        saveLocalExpenses(expenses);
 
-        } catch (error) {
-
-            console.error('Error:', error);
-
-        }
+        loadData();
 
     }
 
@@ -573,63 +427,21 @@ window.deleteExpense = async function(id) {
 
 
 
-window.saveExpense = async function() {
-
-    const btn = document.getElementById('save-btn');
+window.saveExpense = function() {
 
     const amount = parseFloat(currentAmountStr);
 
+    if (isNaN(amount) || amount <= 0) { alert("Monto inválido"); return; }
 
+    const cat = document.getElementById('category').value;
 
-    if (isNaN(amount) || amount <= 0) {
+    const desc = document.getElementById('desc-nota').value;
 
-        alert("Ingresa un monto válido.");
+    const curr = document.getElementById('currency').value;
 
-        return;
-
-    }
-
-
-
-    btn.innerText = 'Guardando...';
-
-    btn.disabled = true;
-
-    
-
-    const payload = {
-
-        category: document.getElementById('category').value,
-
-        description: document.getElementById('desc-nota').value,
-
-        amount: amount,
-
-        currency: document.getElementById('currency').value
-
-    };
-
-    
-
-    await fetch('/api/expenses', {
-
-        method: 'POST',
-
-        headers: {'Content-Type': 'application/json'},
-
-        body: JSON.stringify(payload)
-
-    });
-
-    
+    saveToLocalDB(cat, desc, amount, curr);
 
     closeModal();
-
-    btn.innerText = 'Guardar Movimiento';
-
-    btn.disabled = false;
-
-    loadData();
 
 };
 

@@ -11,15 +11,7 @@
 
     <meta name="theme-color" content="#000000">
 
-    <meta name="apple-mobile-web-app-capable" content="yes">
-
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-
-    <link rel="manifest" href="manifest.json">
-
-    <link rel="apple-touch-icon" href="icon.svg">
-
-    
+    <title>Finanzas Bimonetarias PWA</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
 
@@ -27,37 +19,21 @@
 
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
-    
-
     <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
 
     <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
-
-
-
-    <title>Finanzas Bimonetarias PWA</title>
 
     <style>
 
         :root {
 
-            --bg: #000000;
+            --bg: #000000; --surface: #1c1c1e; --surface-hover: #2c2c2e;
 
-            --surface: #1c1c1e;
+            --text-main: #ffffff; --text-sec: #8e8e93;
 
-            --surface-hover: #2c2c2e;
+            --accent: #d4af37; --accent-glow: rgba(212, 175, 55, 0.4);
 
-            --text-main: #ffffff;
-
-            --text-sec: #8e8e93;
-
-            --accent: #d4af37;
-
-            --accent-glow: rgba(212, 175, 55, 0.4);
-
-            --border: #38383a;
-
-            --danger: #ff453a;
+            --border: #38383a; --danger: #ff453a;
 
         }
 
@@ -65,23 +41,37 @@
 
         body {
 
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            font-family: 'Inter', sans-serif;
 
             background-color: var(--bg);
 
             color: var(--text-main);
 
-            margin: 0; padding: 20px 20px 40px 20px;
+            margin: 0; padding: 0;
 
-            -webkit-font-smoothing: antialiased;
-
-            overflow-x: hidden;
+            display: flex; justify-content: center;
 
         }
 
 
 
-        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+        /* DISEÑO MÓVIL POR DEFECTO */
+
+        .app-wrapper {
+
+            width: 100%; max-width: 480px; min-height: 100vh;
+
+            padding: 20px 20px 40px 20px; box-sizing: border-box;
+
+            position: relative; overflow-x: hidden;
+
+        }
+
+
+
+        /* Aumentamos el margen inferior del header para empujar la rueda hacia abajo */
+
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 75px; }
 
         .header-date { font-weight: 700; font-size: 20px; color: var(--text-main); }
 
@@ -91,15 +81,7 @@
 
         
 
-        .voice-btn {
-
-            background: rgba(255, 255, 255, 0.1); border: 1px solid var(--border); color: #fff;
-
-            width: 36px; height: 36px; border-radius: 12px; display: flex; align-items: center; justify-content: center;
-
-            cursor: pointer; transition: all 0.2s; font-size: 18px;
-
-        }
+        .voice-btn { background: rgba(255, 255, 255, 0.1); border: 1px solid var(--border); color: #fff; width: 36px; height: 36px; border-radius: 12px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s; font-size: 18px; z-index: 20;}
 
         .voice-btn:active { transform: scale(0.9); background: var(--accent); color: #000; }
 
@@ -107,101 +89,95 @@
 
 
 
-        @keyframes pulse {
-
-            0% { box-shadow: 0 0 0 0 rgba(255, 69, 58, 0.4); }
-
-            70% { box-shadow: 0 0 0 10px rgba(255, 69, 58, 0); }
-
-            100% { box-shadow: 0 0 0 0 rgba(255, 69, 58, 0); }
-
-        }
+        @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(255, 69, 58, 0.4); } 70% { box-shadow: 0 0 0 10px rgba(255, 69, 58, 0); } 100% { box-shadow: 0 0 0 0 rgba(255, 69, 58, 0); } }
 
 
 
-        .ring-container { position: relative; width: 100%; max-width: 320px; aspect-ratio: 1; margin: 0 auto 40px auto; }
+        /* Aumentada la escala del contenedor principal en móvil */
 
-        
+        .ring-container { position: relative; width: 100%; max-width: 350px; aspect-ratio: 1; margin: 0 auto 40px auto; }
 
-        .chart-ring {
+        .chart-ring { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 58%; height: 58%; border-radius: 50%; background: conic-gradient(var(--border) 0% 100%); z-index: 1; transition: background 0.5s ease-out; box-shadow: 0 0 25px var(--accent-glow); }
 
-            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-
-            width: 58%; height: 58%; border-radius: 50%;
-
-            background: conic-gradient(var(--border) 0% 100%);
-
-            z-index: 1; transition: background 0.5s ease-out;
-
-            box-shadow: 0 0 25px var(--accent-glow);
-
-        }
-
-
-
-        .center-display {
-
-            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-
-            width: 52%; height: 52%; background: var(--surface); border-radius: 50%;
-
-            display: flex; flex-direction: column; justify-content: center; align-items: center; 
-
-            box-shadow: inset 0 4px 10px rgba(0,0,0,0.5); z-index: 2;
-
-        }
-
-        
+        .center-display { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 52%; height: 52%; background: var(--surface); border-radius: 50%; display: flex; flex-direction: column; justify-content: center; align-items: center; box-shadow: inset 0 4px 10px rgba(0,0,0,0.5); z-index: 2; }
 
         .center-label { font-size: 11px; color: var(--text-sec); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 2px;}
 
-        .center-usd { font-size: 26px; font-weight: 700; color: var(--text-main); margin: 0;}
+        .center-usd { font-size: 28px; font-weight: 700; color: var(--text-main); margin: 0;}
 
         .center-ves { font-size: 12px; color: var(--accent); font-weight: 600; margin-top: 4px;}
 
 
 
-        .cat-btn {
+        /* Botones de categorías: más grandes en móvil y con transición suave */
 
-            position: absolute; transform: translate(-50%, -50%); background: var(--surface);
+        .cat-btn { 
 
-            border: 1px solid var(--border); border-radius: 50%; width: 68px; height: 68px;
+            position: absolute; transform: translate(-50%, -50%); background: var(--surface); 
 
-            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            border: 1px solid var(--border); border-radius: 50%; 
 
-            color: var(--text-sec); box-shadow: 0 8px 16px rgba(0,0,0,0.4); transition: all 0.2s; cursor: pointer; z-index: 10;
+            width: 74px; height: 74px; 
+
+            display: flex; flex-direction: column; justify-content: center; align-items: center; 
+
+            color: var(--text-sec); box-shadow: 0 8px 16px rgba(0,0,0,0.4); 
+
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); cursor: pointer; z-index: 10; 
 
         }
 
-        .cat-btn:active { transform: translate(-50%, -50%) scale(0.9); }
+        
 
-        .cat-btn ion-icon { font-size: 24px; margin-bottom: 4px; }
+        /* Efecto de Iluminación para Escritorio (Mouse Hover) */
 
-        .cat-btn span { font-size: 10px; font-weight: 600; }
+        @media (hover: hover) {
 
+            .cat-btn:hover {
 
+                box-shadow: 0 0 25px rgba(255, 255, 255, 0.15), inset 0 0 10px rgba(255, 255, 255, 0.05);
 
-        .pos-1 { top: 0%; left: 50%; }     
+                transform: translate(-50%, -50%) scale(1.1);
 
-        .pos-2 { top: 38%; left: 95%; }    
+                border-color: rgba(255, 255, 255, 0.4);
 
-        .pos-3 { top: 90%; left: 79%; }    
+                color: #ffffff;
 
-        .pos-4 { top: 90%; left: 21%; }    
+                z-index: 20;
 
-        .pos-5 { top: 38%; left: 5%; }     
+            }
+
+        }
+
+        
+
+        .cat-btn:active { transform: translate(-50%, -50%) scale(0.9); box-shadow: none; }
+
+        .cat-btn ion-icon { font-size: 26px; margin-bottom: 4px; transition: transform 0.3s; }
+
+        .cat-btn:hover ion-icon { transform: scale(1.15); }
+
+        .cat-btn span { font-size: 11px; font-weight: 600; }
+
+        
+
+        /* Ajuste de posiciones */
+
+        .pos-1 { top: -2%; left: 50%; } 
+
+        .pos-2 { top: 38%; left: 98%; } 
+
+        .pos-3 { top: 92%; left: 81%; } 
+
+        .pos-4 { top: 92%; left: 19%; } 
+
+        .pos-5 { top: 38%; left: 2%; }
 
 
 
         .list-header { font-size: 16px; font-weight: 600; margin: 10px 0 15px 5px; color: var(--text-sec); }
 
-        .expense-item {
-
-            background: var(--surface); border-radius: 16px; padding: 15px; margin-bottom: 10px;
-
-            display: flex; justify-content: space-between; align-items: center; border: 1px solid var(--border);
-
-        }
+        .expense-item { background: var(--surface); border-radius: 16px; padding: 15px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; border: 1px solid var(--border); }
 
         .ex-info { flex: 1; display: flex; align-items: center; gap: 12px; }
 
@@ -219,33 +195,13 @@
 
         .btn-delete { width: 36px; height: 36px; padding: 0; margin-left: 10px; background: transparent; color: var(--danger); border-radius: 10px; border: none;}
 
-        .btn-delete:active { background: rgba(255, 69, 58, 0.15); transform: scale(0.85); }
-
-        .btn-delete ion-icon { font-size: 22px; }
 
 
-
-        .modal-overlay {
-
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-
-            background: rgba(0,0,0,0.8); backdrop-filter: blur(5px); display: flex; justify-content: center; align-items: flex-end;
-
-            opacity: 0; pointer-events: none; transition: opacity 0.2s; z-index: 100;
-
-        }
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); backdrop-filter: blur(5px); display: flex; justify-content: center; align-items: flex-end; opacity: 0; pointer-events: none; transition: opacity 0.2s; z-index: 100; }
 
         .modal-overlay.active { opacity: 1; pointer-events: auto; }
 
-        .modal-content {
-
-            background: var(--surface); width: 100%; border-radius: 24px 24px 0 0; padding: 25px 25px 35px 25px;
-
-            transform: translateY(100%); transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1); box-sizing: border-box;
-
-            border-top: 1px solid var(--border);
-
-        }
+        .modal-content { background: var(--surface); width: 100%; max-width: 480px; border-radius: 24px 24px 0 0; padding: 25px 25px 35px 25px; transform: translateY(100%); transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1); box-sizing: border-box; border-top: 1px solid var(--border); }
 
         .modal-overlay.active .modal-content { transform: translateY(0); }
 
@@ -263,51 +219,21 @@
 
         .input-group ion-icon { position: absolute; left: 14px; color: var(--text-sec); font-size: 20px; transition: color 0.3s;}
 
-        input {
-
-            width: 100%; padding: 16px 16px 16px 42px; border-radius: 12px; border: 1px solid var(--border);
-
-            background-color: #000; color: #fff; font-size: 16px; font-family: inherit; box-sizing: border-box; -webkit-appearance: none; transition: all 0.3s;
-
-        }
+        input { width: 100%; padding: 16px 16px 16px 42px; border-radius: 12px; border: 1px solid var(--border); background-color: #000; color: #fff; font-size: 16px; font-family: inherit; box-sizing: border-box; transition: all 0.3s; }
 
         input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 4px var(--accent-glow); }
 
-        input:focus + ion-icon { color: var(--accent); }
+        
 
-
-
-        .amount-display {
-
-            flex: 1; padding: 16px 16px 16px 42px; border-radius: 12px; border: 1px solid var(--border);
-
-            background-color: #000; color: #fff; font-size: 18px; font-weight: 600; font-family: inherit; 
-
-            box-sizing: border-box; display: flex; align-items: center; min-height: 53px; overflow: hidden;
-
-        }
+        .amount-display { flex: 1; padding: 16px 16px 16px 42px; border-radius: 12px; border: 1px solid var(--border); background-color: #000; color: #fff; font-size: 18px; font-weight: 600; font-family: inherit; box-sizing: border-box; display: flex; align-items: center; min-height: 53px; }
 
         .amount-display.empty { color: var(--text-sec); font-weight: 400; font-size: 16px; }
 
         
 
-        .currency-toggle {
+        .currency-toggle { display: flex; width: 100px; background-color: #000; border-radius: 12px; border: 1px solid var(--border); overflow: hidden; }
 
-            display: flex; width: 100px; background-color: #000; border-radius: 12px;
-
-            border: 1px solid var(--border); overflow: hidden;
-
-        }
-
-        .curr-btn {
-
-            flex: 1; display: flex; justify-content: center; align-items: center;
-
-            font-size: 15px; font-weight: 600; color: var(--text-sec);
-
-            cursor: pointer; transition: all 0.2s;
-
-        }
+        .curr-btn { flex: 1; display: flex; justify-content: center; align-items: center; font-size: 15px; font-weight: 600; color: var(--text-sec); cursor: pointer; transition: all 0.2s; }
 
         .curr-btn.active { background-color: var(--accent); color: #000; }
 
@@ -315,17 +241,7 @@
 
         .keypad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 15px; }
 
-        .key-btn {
-
-            background-color: var(--bg); color: var(--text-main); border: 1px solid var(--border);
-
-            border-radius: 12px; padding: 12px 0; font-size: 22px; font-weight: 600;
-
-            display: flex; justify-content: center; align-items: center; cursor: pointer;
-
-            transition: background-color 0.1s, transform 0.1s; user-select: none;
-
-        }
+        .key-btn { background-color: var(--bg); color: var(--text-main); border: 1px solid var(--border); border-radius: 12px; padding: 12px 0; font-size: 22px; font-weight: 600; display: flex; justify-content: center; align-items: center; cursor: pointer; user-select: none; }
 
         .key-btn:active { background-color: var(--surface-hover); transform: scale(0.95); }
 
@@ -339,7 +255,137 @@
 
         .btn-save { width: 100%; background-color: var(--accent); color: #000; border: none; padding: 16px; border-radius: 12px; font-size: 17px; font-weight: 700; cursor: pointer; transition: transform 0.2s;}
 
-        .btn-save:active { transform: scale(0.96); opacity: 0.9; }
+
+
+        /* DISEÑO DE ESCRITORIO (DASHBOARD PANORÁMICO OPTIMIZADO) */
+
+        @media (min-width: 850px) {
+
+            body { align-items: center; background-color: #080808; min-height: 100vh; margin: 0; }
+
+            .app-wrapper {
+
+                width: 90vw;
+
+                max-width: 1400px;
+
+                height: 80vh;
+
+                min-height: 600px;
+
+                display: grid;
+
+                grid-template-columns: 1fr 1.5fr;
+
+                grid-template-areas: 
+
+                    "header header"
+
+                    "chart list";
+
+                gap: 20px 60px;
+
+                padding: 40px 60px;
+
+                border-radius: 30px;
+
+                border: 1px solid var(--border);
+
+                box-shadow: 0 25px 60px rgba(0,0,0,0.6);
+
+                background-color: var(--bg);
+
+                box-sizing: border-box;
+
+            }
+
+            .header { grid-area: header; margin-bottom: 0; align-self: start; }
+
+            
+
+            /* Gráfico super expandido para PC */
+
+            .ring-container { 
+
+                grid-area: chart; 
+
+                margin: auto; 
+
+                width: 100%; 
+
+                max-width: 550px; 
+
+                aspect-ratio: 1;
+
+            }
+
+            
+
+            /* Botones de categorías enormes en PC */
+
+            .cat-btn { width: 100px; height: 100px; }
+
+            .cat-btn ion-icon { font-size: 34px; margin-bottom: 6px; }
+
+            .cat-btn span { font-size: 13px; letter-spacing: 0.5px;}
+
+            .center-usd { font-size: 44px; } 
+
+
+
+            .list-section { 
+
+                grid-area: list; 
+
+                height: 100%;
+
+                max-height: calc(80vh - 120px);
+
+                overflow-y: auto; 
+
+                padding-right: 20px; 
+
+                display: flex;
+
+                flex-direction: column;
+
+            }
+
+            
+
+            .expense-item { padding: 20px; margin-bottom: 15px; transition: transform 0.2s; }
+
+            .expense-item:hover { transform: translateX(-5px); border-color: rgba(255,255,255,0.2); }
+
+            .ex-title { font-size: 18px; }
+
+            .ex-usd { font-size: 18px; }
+
+            .ex-ves { font-size: 14px; }
+
+            .ex-icon { font-size: 24px; padding: 15px; }
+
+            
+
+            .list-section::-webkit-scrollbar { width: 8px; }
+
+            .list-section::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
+
+            
+
+            .modal-overlay { align-items: center; }
+
+            .modal-content {
+
+                border-radius: 24px; border: 1px solid var(--border);
+
+                transform: translateY(30px) scale(0.95); opacity: 0;
+
+            }
+
+            .modal-overlay.active .modal-content { transform: translateY(0) scale(1); opacity: 1; }
+
+        }
 
     </style>
 
@@ -347,17 +393,63 @@
 
 <body>
 
+    <div class="app-wrapper">
+
+        <div class="header">
+
+            <div class="header-date" id="date-display">--/--/----</div>
+
+            <div class="header-actions">
+
+                <button class="voice-btn" id="voice-trigger" onclick="startVoiceRecognition()" title="Dictar Gasto"><ion-icon name="mic-outline"></ion-icon></button>
+
+                <div class="header-rate" id="rate-display"><ion-icon name="swap-horizontal"></ion-icon> Consultando...</div>
+
+            </div>
+
+        </div>
 
 
-    <div class="header">
 
-        <div class="header-date" id="date-display">--/--/----</div>
+        <div class="ring-container">
 
-        <div class="header-actions">
+            <div class="chart-ring" id="category-chart"></div>
 
-            <button class="voice-btn" id="voice-trigger" onclick="startVoiceRecognition()" title="Dictar Gasto"><ion-icon name="mic-outline"></ion-icon></button>
+            <div class="center-display">
 
-            <div class="header-rate" id="rate-display"><ion-icon name="swap-horizontal"></ion-icon> Cargando...</div>
+                <span class="center-label">Gasto del Mes</span>
+
+                <div class="center-usd" id="total-usd">$0.00</div>
+
+                <div class="center-ves" id="total-ves">Bs. 0.00</div>
+
+            </div>
+
+
+
+            <div class="cat-btn pos-1" onclick="openModal('Comida', 'restaurant-outline', '#ff5964')"><ion-icon name="restaurant-outline" style="color:#ff5964"></ion-icon><span>Comida</span></div>
+
+            <div class="cat-btn pos-2" onclick="openModal('Casa', 'home-outline', '#38b000')"><ion-icon name="home-outline" style="color:#38b000"></ion-icon><span>Casa</span></div>
+
+            <div class="cat-btn pos-3" onclick="openModal('Servicios', 'flash-outline', '#f77f00')"><ion-icon name="flash-outline" style="color:#f77f00"></ion-icon><span>Servicios</span></div>
+
+            <div class="cat-btn pos-4" onclick="openModal('Transporte', 'car-sport-outline', '#48cae4')"><ion-icon name="car-sport-outline" style="color:#48cae4"></ion-icon><span>Transporte</span></div>
+
+            <div class="cat-btn pos-5" onclick="openModal('Otros', 'apps-outline', '#b5179e')"><ion-icon name="apps-outline" style="color:#b5179e"></ion-icon><span>Otros</span></div>
+
+        </div>
+
+
+
+        <div class="list-section">
+
+            <div class="list-header" id="list-title">Movimientos Recientes</div>
+
+            <div id="expenses-list">
+
+                <p style="color: var(--text-sec); text-align: center; font-size: 14px; margin-top: 20px;">Cargando historial...</p>
+
+            </div>
 
         </div>
 
@@ -365,49 +457,7 @@
 
 
 
-    <div class="ring-container">
-
-        <div class="chart-ring" id="category-chart"></div>
-
-
-
-        <div class="center-display">
-
-            <span class="center-label">Gasto del Mes</span>
-
-            <div class="center-usd" id="total-usd">$0.00</div>
-
-            <div class="center-ves" id="total-ves">Bs. 0.00</div>
-
-        </div>
-
-
-
-        <!-- Categorías genéricas para el repositorio público -->
-
-        <div class="cat-btn pos-1" onclick="openModal('Comida', 'restaurant-outline', '#ff5964')"><ion-icon name="restaurant-outline" style="color:#ff5964"></ion-icon><span>Comida</span></div>
-
-        <div class="cat-btn pos-2" onclick="openModal('Casa', 'home-outline', '#38b000')"><ion-icon name="home-outline" style="color:#38b000"></ion-icon><span>Casa</span></div>
-
-        <div class="cat-btn pos-3" onclick="openModal('Servicios', 'flash-outline', '#f77f00')"><ion-icon name="flash-outline" style="color:#f77f00"></ion-icon><span>Servicios</span></div>
-
-        <div class="cat-btn pos-4" onclick="openModal('Transporte', 'car-sport-outline', '#48cae4')"><ion-icon name="car-sport-outline" style="color:#48cae4"></ion-icon><span>Transporte</span></div>
-
-        <div class="cat-btn pos-5" onclick="openModal('Otros', 'apps-outline', '#b5179e')"><ion-icon name="apps-outline" style="color:#b5179e"></ion-icon><span>Otros</span></div>
-
-    </div>
-
-
-
-    <div class="list-header" id="list-title">Movimientos Recientes</div>
-
-    <div id="expenses-list">
-
-        <p style="color: var(--text-sec); text-align: center; font-size: 14px; margin-top: 20px;">Cargando historial...</p>
-
-    </div>
-
-
+    <!-- MODAL -->
 
     <div class="modal-overlay" id="expense-modal">
 
@@ -426,8 +476,6 @@
             <div id="expense-form-container">
 
                 <input type="hidden" id="category" value="">
-
-                
 
                 <div class="input-group">
 
@@ -448,8 +496,6 @@
                         <div id="amount-display" class="amount-display empty">Monto</div>
 
                     </div>
-
-                    
 
                     <div class="currency-toggle">
 
