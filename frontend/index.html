@@ -55,7 +55,7 @@
 
 
 
-        /* Contenedor Base (Móvil) */
+        /* DISEÑO MÓVIL POR DEFECTO */
 
         .app-wrapper {
 
@@ -199,15 +199,15 @@
 
 
 
-        /* DISEÑO PARA ESCRITORIO (DASHBOARD) */
+        /* DISEÑO DE ESCRITORIO (DASHBOARD PANORÁMICO) */
 
         @media (min-width: 850px) {
 
-            body { align-items: center; background-color: #050505; }
+            body { align-items: center; background-color: #080808; }
 
             .app-wrapper {
 
-                max-width: 900px; height: 600px; min-height: auto;
+                max-width: 1000px; height: 650px; min-height: auto;
 
                 display: grid;
 
@@ -219,15 +219,15 @@
 
                     "chart list";
 
-                gap: 0 40px;
+                gap: 0 50px;
 
-                padding: 40px;
+                padding: 40px 50px;
 
-                border-radius: 24px;
+                border-radius: 30px;
 
                 border: 1px solid var(--border);
 
-                box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+                box-shadow: 0 25px 60px rgba(0,0,0,0.6);
 
                 background-color: var(--bg);
 
@@ -235,13 +235,13 @@
 
             .header { grid-area: header; margin-bottom: 20px; }
 
-            .ring-container { grid-area: chart; margin: 0 auto; width: 100%; }
+            .ring-container { grid-area: chart; margin: 20px auto 0 auto; width: 100%; max-width: 380px; }
 
             .list-section { 
 
                 grid-area: list; 
 
-                height: 420px; 
+                height: 460px; 
 
                 overflow-y: auto; 
 
@@ -249,7 +249,9 @@
 
             }
 
-            /* Scrollbar personalizado para PC */
+            
+
+            /* Scrollbar elegante */
 
             .list-section::-webkit-scrollbar { width: 6px; }
 
@@ -257,7 +259,7 @@
 
             
 
-            /* Ajuste del modal para PC */
+            /* Modal centrado como Pop-up en PC */
 
             .modal-overlay { align-items: center; }
 
@@ -289,7 +291,7 @@
 
                 <button class="voice-btn" id="voice-trigger" onclick="startVoiceRecognition()" title="Dictar Gasto"><ion-icon name="mic-outline"></ion-icon></button>
 
-                <div class="header-rate" id="rate-display"><ion-icon name="swap-horizontal"></ion-icon> Cargando...</div>
+                <div class="header-rate" id="rate-display"><ion-icon name="swap-horizontal"></ion-icon> Consultando...</div>
 
             </div>
 
@@ -333,7 +335,7 @@
 
             <div id="expenses-list">
 
-                <p style="color: var(--text-sec); text-align: center; font-size: 14px; margin-top: 20px;">Cargando...</p>
+                <p style="color: var(--text-sec); text-align: center; font-size: 14px; margin-top: 20px;">Cargando historial...</p>
 
             </div>
 
@@ -342,6 +344,8 @@
     </div>
 
 
+
+    <!-- MODAL -->
 
     <div class="modal-overlay" id="expense-modal">
 

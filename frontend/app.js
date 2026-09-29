@@ -1,11 +1,5 @@
 
-// Ì†ΩÌª†Ô∏è TASA MANUAL PARA LA DEMO P√öBLICA (Evita fallos de APIs externas)
-
-const TASA_BCV_DEMO = 36.70; 
-
-
-
-let currentBcvRate = TASA_BCV_DEMO;
+let currentBcvRate = 0;
 
 let currentAmountStr = "";
 
@@ -13,7 +7,7 @@ let currentAmountStr = "";
 
 document.addEventListener('DOMContentLoaded', () => {
 
-    loadData();
+    fetchLiveBCV();
 
 });
 
@@ -30,6 +24,54 @@ const meses = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', '
 function getLocalExpenses() { return JSON.parse(localStorage.getItem('demo_expenses')) || []; }
 
 function saveLocalExpenses(expenses) { localStorage.setItem('demo_expenses', JSON.stringify(expenses)); }
+
+
+
+// Hacemos Scraping directo a la web del BCV usando un proxy para saltar CORS
+
+async function fetchLiveBCV() {
+
+    try {
+
+        const response = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent('https://www.bcv.org.ve/')}`);
+
+        const data = await response.json();
+
+        const parser = new DOMParser();
+
+        const doc = parser.parseFromString(data.contents, 'text/html');
+
+        
+
+        // Buscamos exactamente el mismo div que busca tu Python Backend
+
+        const rateDiv = doc.querySelector('#dolar strong');
+
+        if (rateDiv) {
+
+            let valText = rateDiv.innerText.replace(',', '.').trim();
+
+            currentBcvRate = parseFloat(valText);
+
+        } else {
+
+            throw new Error("No se encontr√≥ el selector");
+
+        }
+
+    } catch (error) {
+
+        console.error("Error scrapeando BCV:", error);
+
+        // Tasa de emergencia por si el servidor del BCV se cae
+
+        currentBcvRate = 857.00; 
+
+    }
+
+    loadData();
+
+}
 
 
 
@@ -67,9 +109,7 @@ function loadData() {
 
     if (expenses.length === 0) {
 
-        // Mensaje limpio
-
-        list.innerHTML = '<p style="color: var(--text-sec); text-align: center; font-size: 14px; margin-top: 20px;">Toca una categor√≠a para probar <ion-icon name="arrow-up-outline"></ion-icon></p>';
+        list.innerHTML = '<p style="color: var(--text-sec); text-align: center; font-size: 14px; margin-top: 20px;">Toca una categor√≠a para probar <br><br> <ion-icon name="arrow-up-outline"></ion-icon></p>';
 
         document.getElementById('category-chart').style.background = `conic-gradient(var(--border) 0% 100%)`;
 
