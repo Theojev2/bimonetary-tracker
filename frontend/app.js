@@ -44,20 +44,48 @@ const catColors = {
 
 const meses = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
 
-// --- NUEVA LÓGICA: BCV EN TIEMPO REAL DESDE DOLARAPI ---
+// --- NUEVA LÓGICA: BCV DESDE HISTÓRICO ---
 async function getRealTimeBCV() {
     try {
-        const url = `https://ve.dolarapi.com/v1/dolares/oficial?t=${Date.now()}`;
-        const response = await fetch(url, { cache: 'no-store' });
-        if (!response.ok) throw new Error('Fallo al contactar a DolarApi');
-        const data = await response.json();
+        // 1. URL de la API histórica con cache-buster para forzar actualización
+        const url = `https://ve.dolarapi.com/v1/historicos/dolares?t=${Date.now()}`;
         
-        const rate = data.promedio || data.venta;
-        return { rate: rate, fetched_at: new Date(data.fechaActualizacion).toLocaleString('es-VE') };
+        const response = await fetch(url, { cache: 'no-store' });
+        if (!response.ok) throw new Error('Fallo al contactar a la API histórica');
+        
+        const data = await response.json(); 
+        
+        // 2. Construir la fecha de hoy en formato YYYY-MM-DD (Hora de Venezuela)
+        const tzDate = new Date().toLocaleString("en-US", { timeZone: "America/Caracas" });
+        const d = new Date(tzDate);
+        const year = d.getFullYear();
+        const month = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
+        const fechaHoy = `${year}-${month}-${day}`; 
+
+        // 3. Buscar exactamente la tasa "oficial" de hoy
+        let tasaSeleccionada = data.find(item => item.fecha === fechaHoy && item.fuente === "oficial");
+
+        // 4. SALVACAÍDAS: Si no hay tasa de hoy, agarramos la última oficial disponible
+        if (!tasaSeleccionada) {
+            const oficiales = data.filter(item => item.fuente === "oficial");
+            tasaSeleccionada = oficiales[oficiales.length - 1]; 
+        }
+
+        if (!tasaSeleccionada) throw new Error('No se encontraron tasas oficiales en el historial');
+
+        // 5. Extraer el promedio y formatear la fecha a DD/MM/YYYY
+        const rate = tasaSeleccionada.promedio;
+        const [y, m, d_str] = tasaSeleccionada.fecha.split('-');
+        const fechaMostrada = `${d_str}/${m}/${y}`; 
+
+        console.log(`✅ Tasa BCV Histórica: ${rate} Bs. (Día: ${fechaMostrada})`);
+
+        return { rate: rate, fetched_at: fechaMostrada };
+
     } catch (error) {
-        console.error("❌ Error obteniendo la tasa:", error);
-        // Retorna un valor por defecto para no romper la app si no hay internet
-        return { rate: currentBcvRate || 36.5, fetched_at: new Date().toLocaleString('es-VE') };
+        console.error("❌ Error obteniendo la tasa del historial:", error);
+        return { rate: currentBcvRate || 36.5, fetched_at: new Date().toLocaleDateString('es-VE') };
     }
 }
 
